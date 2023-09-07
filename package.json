@@ -16,7 +16,7 @@
     "yjs": "^13.6.1"
   },
   "engines": {
-    "node": "^18"
+    "node": "^16.20"
   },
   "author": "",
   "license": "ISC"
