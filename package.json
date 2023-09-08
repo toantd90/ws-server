@@ -11,8 +11,8 @@
     "lib0": "^0.2.83",
     "lodash": "^4.17.21",
     "ws": "^8.13.0",
-    "y-leveldb": "^0.1.2",
     "y-protocols": "^1.0.5",
+    "y-mongodb-provider": "^0.1.7",
     "yjs": "^13.6.1"
   },
   "engines": {
