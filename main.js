@@ -95,8 +95,9 @@ class WSSharedDoc extends yjs_1.Doc {
 }
 exports.WSSharedDoc = WSSharedDoc;
 let persistence = null;
-const uri = 'mongodb+srv://journey2:journey1234@cluster0.49jjmuc.mongodb.net/test?retryWrites=true&w=majority';
-const mdb = new y_mongodb_provider_1.MongodbPersistence(uri);
+const mongoDBUri = 'mongodb+srv://journey2:journey1234@cluster0.49jjmuc.mongodb.net/test?retryWrites=true&w=majority';
+console.info(`Persisting documents to "${mongoDBUri}"`);
+const mdb = new y_mongodb_provider_1.MongodbPersistence(mongoDBUri);
 persistence = {
     provider: mdb,
     bindState: (docName, ydoc) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
@@ -105,7 +106,6 @@ persistence = {
         mdb.storeUpdate(docName, newUpdates);
         (0, yjs_1.applyUpdate)(ydoc, (0, yjs_1.encodeStateAsUpdate)(persistedYdoc));
         ydoc.on('update', (update) => {
-            console.log('update', update);
             mdb.storeUpdate(docName, update);
         });
     }),
@@ -134,7 +134,7 @@ const updateHandler = (update, origin, doc) => {
     doc.conns.forEach((_, conn) => send(doc, conn, message));
 };
 /**
- * Gets a Y.Doc by name, whether in memory or on disk
+ * Gets a Y.Doc by name, whether in memory or on persistence layer (mongoDB)
  *
  * docname - the name of the Y.Doc to find or create
  * gc - whether to allow gc on the doc (applies only when created)
@@ -253,7 +253,7 @@ function setupWSConnection(conn, req, { docName = req.url.slice(1).split('?')[0]
         (0, encoding_1.writeVarUint)(encoder, messageSync);
         (0, sync_1.writeSyncStep1)(encoder, doc);
         send(doc, conn, (0, encoding_1.toUint8Array)(encoder));
-        const awarenessStates = doc.awareness.getStates();
+        const awarenessStates = new Map([...doc.awareness.getStates()].filter(([_, value]) => !!value));
         if (awarenessStates.size > 0) {
             const encoder = (0, encoding_1.createEncoder)();
             (0, encoding_1.writeVarUint)(encoder, messageAwareness);
@@ -369,7 +369,7 @@ class MongodbPersistence {
         };
     }
     /**
-     * Create a Y.Doc instance with the data persistet in mongodb.
+     * Create a Y.Doc instance with the data persisted in mongodb.
      * Use this to temporarily create a Yjs document to sync changes or extract data.
      */
     getYDoc(docName) {
