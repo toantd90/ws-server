@@ -169,6 +169,7 @@ const messageListener = (conn, doc, message) => {
                 }
                 break;
             case messageAwareness: {
+                console.log('awareness state from messageAwareness: ', doc.awareness.getStates());
                 (0, awareness_1.applyAwarenessUpdate)(doc.awareness, (0, decoding_1.readVarUint8Array)(decoder), conn);
                 break;
             }
@@ -253,6 +254,8 @@ function setupWSConnection(conn, req, { docName = req.url.slice(1).split('?')[0]
         (0, encoding_1.writeVarUint)(encoder, messageSync);
         (0, sync_1.writeSyncStep1)(encoder, doc);
         send(doc, conn, (0, encoding_1.toUint8Array)(encoder));
+        console.log('awareness state: ', doc.awareness.getStates());
+        // Filter out undefined awareness state
         const awarenessStates = new Map([...doc.awareness.getStates()].filter(([_, value]) => !!value));
         if (awarenessStates.size > 0) {
             const encoder = (0, encoding_1.createEncoder)();
