@@ -155,7 +155,7 @@
             const encoder = (0, encoding_1.createEncoder)();
             const decoder = (0, decoding_1.createDecoder)(message);
             const messageType = (0, decoding_1.readVarUint)(decoder);
-            console.log('message:', message);
+            // console.log('message:', message);
             // eslint-disable-next-line default-case
             switch (messageType) {
                 case messageSync:
@@ -169,7 +169,7 @@
                     }
                     break;
                 case messageAwareness: {
-                    console.log('awareness state from messageAwareness: ', doc.awareness.getStates());
+                    console.log('new user join: ', doc.awareness);
                     (0, awareness_1.applyAwarenessUpdate)(doc.awareness, (0, decoding_1.readVarUint8Array)(decoder), conn);
                     break;
                 }
@@ -254,9 +254,8 @@
             (0, encoding_1.writeVarUint)(encoder, messageSync);
             (0, sync_1.writeSyncStep1)(encoder, doc);
             send(doc, conn, (0, encoding_1.toUint8Array)(encoder));
-            console.log('awareness state: ', doc.awareness.getStates());
             // Filter out undefined awareness state
-            const awarenessStates = doc.awareness.getStates();
+            const awarenessStates = new Map([...doc.awareness.getStates()].filter(([_, value]) => !!value));
             if (awarenessStates.size > 0) {
                 const encoder = (0, encoding_1.createEncoder)();
                 (0, encoding_1.writeVarUint)(encoder, messageAwareness);
@@ -908,11 +907,18 @@
     const http_1 = __webpack_require__(2);
     const utils_1 = __webpack_require__(3);
     const wss = new ws_1.Server({ noServer: true });
-    const port = Number(process.env.PORT) || 1234;
-    const host = process.env.HOST || 'localhost';
+    const port = Number(process.env.PORT) || 8080;
+    const host = process.env.HOST || '0.0.0.0';
     const server = (0, http_1.createServer)((request, response) => {
-        response.writeHead(200, { 'Content-Type': 'text/plain' });
-        response.end('okay');
+        if (request.url === '/healthcheck') {
+            console.log('Health check is working');
+            response.writeHead(200, { 'Content-Type': 'text/plain' });
+            response.end('Server is healthy');
+        }
+        else {
+            response.writeHead(200, { 'Content-Type': 'text/plain' });
+            response.end('okay');
+        }
     });
     wss.on('connection', utils_1.setupWSConnection);
     server.on('upgrade', (request, socket, head) => {
