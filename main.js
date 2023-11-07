@@ -95,7 +95,7 @@
     }
     exports.WSSharedDoc = WSSharedDoc;
     let persistence = null;
-    const mongoDBUri = process.env.MONGODB_URI;
+    const mongoDBUri = 'mongodb+srv://journey2:journey1234@cluster0.49jjmuc.mongodb.net/test?retryWrites=true&w=majority';
     console.info(`Persisting documents to "${mongoDBUri}"`);
     const mdb = new y_mongodb_provider_1.MongodbPersistence(mongoDBUri);
     persistence = {
