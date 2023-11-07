@@ -95,7 +95,7 @@
     }
     exports.WSSharedDoc = WSSharedDoc;
     let persistence = null;
-    const mongoDBUri = 'mongodb+srv://journey2:journey1234@cluster0.49jjmuc.mongodb.net/test?retryWrites=true&w=majority';
+    const mongoDBUri = process.env.MONGODB_URI;
     console.info(`Persisting documents to "${mongoDBUri}"`);
     const mdb = new y_mongodb_provider_1.MongodbPersistence(mongoDBUri);
     persistence = {
@@ -155,7 +155,6 @@
             const encoder = (0, encoding_1.createEncoder)();
             const decoder = (0, decoding_1.createDecoder)(message);
             const messageType = (0, decoding_1.readVarUint)(decoder);
-            // console.log('message:', message);
             // eslint-disable-next-line default-case
             switch (messageType) {
                 case messageSync:
@@ -169,7 +168,10 @@
                     }
                     break;
                 case messageAwareness: {
-                    console.log('new user join: ', doc.awareness);
+                    const decoder2 = (0, decoding_1.createDecoder)((0, decoding_1.readVarUint8Array)(decoder));
+                    const clientID = (0, decoding_1.readVarUint)(decoder2);
+                    console.log('new user join: ', clientID);
+                    console.log('current states', doc.awareness.states);
                     (0, awareness_1.applyAwarenessUpdate)(doc.awareness, (0, decoding_1.readVarUint8Array)(decoder), conn);
                     break;
                 }
